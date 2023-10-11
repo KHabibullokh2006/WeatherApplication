@@ -1,60 +1,88 @@
 package com.example.weatherapplication
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.android.volley.Response
+import com.android.volley.VolleyError
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
+import com.example.weatherapplication.databinding.FragmentHomeBinding
+import org.json.JSONObject
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [HomeFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class HomeFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-    var url = "http://api.weatherapi.com/v1/forecast.json?key=9b23ebf98d4b4be1ba481540230404&q=Tashkent&days=7&aqi=no&alerts=no"
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private var urlDay = "https://api.weatherapi.com/v1/forecast.json?key=9b23ebf98d4b4be1ba481540230404&q=Tashkent&days=7&aqi=no&alerts=no"
+    val urlHour = "https://api.weatherapi.com/v1/forecast.json?key=9b23ebf98d4b4be1ba481540230404&q=Tashkent&days=1&aqi=no&alerts=no"
+
+    var hours = mutableListOf<Hour>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        val binding = FragmentHomeBinding.inflate(inflater, container, false)
+
+        val requestQueue = Volley.newRequestQueue(requireContext())
+        var hourAdapter = HourAdapter(hours)
+        var hourManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.hourRv.adapter = hourAdapter
+        binding.hourRv.layoutManager = hourManager
+
+        val requestDay = JsonObjectRequest(urlDay, object : Response.Listener<JSONObject>{
+            override fun onResponse(response: JSONObject?) {
+                val location = response!!.getJSONObject("location")
+                binding.location.text = location.getString("region")
+                val current = response.getJSONObject("current")
+                binding.temperature.text = current.getString("temp_c")
+                val condition = current.getJSONObject("condition")
+                binding.status.text = condition.getString("text")
+            }
+        }, object : Response.ErrorListener{
+            override fun onErrorResponse(error: VolleyError?) {
+                Log.d("TAG", "onErrorResponse: $error")
+            }
+        })
+
+        val requestHour = JsonObjectRequest(urlHour, object : Response.Listener<JSONObject>{
+            @SuppressLint("NotifyDataSetChanged")
+            override fun onResponse(response: JSONObject?) {
+                var forecast = response!!.getJSONObject("forecast")
+                var forecastday = forecast.getJSONArray("forecastday")
+                for (i in 0 until forecastday.length()){
+                    var obj = forecastday.getJSONObject(i)
+                    var hourObj = obj.getJSONArray("hour")
+                    for (i in 0 until hourObj.length()){
+                        var obj1 = hourObj.getJSONObject(i)
+                        var time = obj1.getString("time")
+                        var temp = obj1.getString("temp_c")
+                        var condition = obj1.getJSONObject("condition")
+                        var img = "https:" + condition.getString("icon")
+                        hours.add(Hour(time, temp, img))
+                        hourAdapter.notifyDataSetChanged()
+
+
+                    }
+                }
+
+
+            }
+        }, object : Response.ErrorListener{
+            override fun onErrorResponse(error: VolleyError?) {
+                Log.d("TAG", "onErrorResponse: $error")
+            }
+
+        })
+
+        requestQueue.add(requestDay)
+        requestQueue.add(requestHour)
+
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment HomeFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            HomeFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
-    }
 }

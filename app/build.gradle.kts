@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.example.weatherapplication"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.weatherapplication"
@@ -36,6 +36,7 @@ android {
     buildFeatures{
         viewBinding = true
     }
+
 }
 
 dependencies {
@@ -54,5 +55,5 @@ dependencies {
     // Coil
     implementation("io.coil-kt:coil:2.4.0")
     //Picasso
-    implementation ("com.square.picasso:picasso:2.5.2")
+//    implementation ("com.square.picasso:picasso:2.5.2")
 }
