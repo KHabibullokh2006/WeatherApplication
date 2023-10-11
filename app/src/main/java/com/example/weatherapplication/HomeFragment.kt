@@ -12,13 +12,15 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.example.weatherapplication.adapter.HourAdapter
 import com.example.weatherapplication.databinding.FragmentHomeBinding
+import com.example.weatherapplication.model.Hour
 import org.json.JSONObject
 
 class HomeFragment : Fragment() {
 
     private var urlDay = "https://api.weatherapi.com/v1/forecast.json?key=9b23ebf98d4b4be1ba481540230404&q=Tashkent&days=7&aqi=no&alerts=no"
-    val urlHour = "https://api.weatherapi.com/v1/forecast.json?key=9b23ebf98d4b4be1ba481540230404&q=Tashkent&days=1&aqi=no&alerts=no"
+    val urlHour = "https://api.weatherapi.com/v1/forecast.json?key=9b23ebf98d4b4be1ba481540230404&q=Tashkent&days=2&aqi=no&alerts=no"
 
     var hours = mutableListOf<Hour>()
 
@@ -35,11 +37,12 @@ class HomeFragment : Fragment() {
         binding.hourRv.layoutManager = hourManager
 
         val requestDay = JsonObjectRequest(urlDay, object : Response.Listener<JSONObject>{
+            @SuppressLint("SetTextI18n")
             override fun onResponse(response: JSONObject?) {
                 val location = response!!.getJSONObject("location")
                 binding.location.text = location.getString("region")
                 val current = response.getJSONObject("current")
-                binding.temperature.text = current.getString("temp_c")
+                binding.temperature.text = current.getString("temp_c") + "°"
                 val condition = current.getJSONObject("condition")
                 binding.status.text = condition.getString("text")
             }

@@ -1,4 +1,4 @@
-package com.example.weatherapplication
+package com.example.weatherapplication.adapter
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +7,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import com.example.weatherapplication.R
+import com.example.weatherapplication.model.Hour
 
 class HourAdapter(var hourList:MutableList<Hour>) : RecyclerView.Adapter<HourAdapter.WeatherHolder>() {
 
